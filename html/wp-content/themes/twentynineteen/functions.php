@@ -328,3 +328,90 @@ require get_template_directory() . '/inc/template-tags.php';
  * Customizer additions.
  */
 require get_template_directory() . '/inc/customizer.php';
+
+
+add_action( 'publish_post', 'create_json');
+
+function create_json() {
+	$args = array(
+		'post_type' => 'post',
+		'orderby' => 'date',
+		'order' => 'DESC',
+		'posts_per_page' => -1
+	);
+	$posts = get_posts($args);
+	  
+	$alltime = 0;
+	$pronunciation = 0;
+	$read = 0;
+	$moment = 0;
+	$grammar = 0;
+	$seidoku = 0;
+	$pre = 0;
+
+	$weight = 0;
+	$arm = 0;
+	$press = 0;
+	if($posts): foreach($posts as $post):
+		setup_postdata($post);
+		if(get_the_category($post->ID)[0]->name == 'レポート'){
+			$reportjson[] = array(
+			"title" => $post->post_title,
+			"content" => get_the_content($post->ID),
+			"cate" => get_the_category($post->ID)[0]->name,
+			"alltime" => get_field("alltime",$post->ID),
+			"pronunciation" => get_field("pronunciation",$post->ID),
+			"read" => get_field("read",$post->ID),
+			"moment" => get_field("moment",$post->ID),
+			"grammar" => get_field("grammar",$post->ID),
+			"seidoku" => get_field("seidoku",$post->ID),
+			"pre" => get_field("pre",$post->ID),
+			"weight" => get_field("weight",$post->ID),
+			"arm" => get_field("arm",$post->ID),
+			"press" => get_field("press",$post->ID),
+			);
+			$alltime = $alltime + get_field("alltime",$post->ID);
+			$pronunciation = $pronunciation + get_field("pronunciation",$post->ID);
+			$read = $read + get_field("read",$post->ID);
+			$moment = $moment + get_field("moment",$post->ID);
+			$grammar = $grammar + get_field("grammar",$post->ID);
+			$seidoku = $seidoku + get_field("seidoku",$post->ID);
+			$pre = $pre + get_field("pre",$post->ID);
+			if($weight == 0){
+				$weight = get_field("weight",$post->ID);
+				$arm = get_field("arm",$post->ID);
+				$press = get_field("press",$post->ID);
+			}
+		}else if(get_the_category($post->ID)[0]->name == '技術'){
+			$techjson[] = array(
+				"title" => $post->post_title,
+				"content" => get_the_content($post->ID),
+				"cate" => get_the_category($post->ID)[0]->name,
+			);
+		}else{
+			$blogjson[] = array(
+				"title" => $post->post_title,
+				"content" => get_the_content($post->ID),
+				"cate" => get_the_category($post->ID)[0]->name,
+			);
+		}
+	endforeach; endif;
+
+	$target[] = array(
+		"alltime" => $alltime,
+		"pronunciation" => $pronunciation,
+		"read" => $read,
+		"moment" => $moment,
+		"grammar" => $grammar,
+		"seidoku" => $seidoku,
+		"pre" => $pre,
+		"weight" => (int) $weight,
+		"arm" => (int) $arm,
+		"press" => (int) $press
+	);
+	$jsons = array("report" => $reportjson,"tech" => $techjson,"blog" => $blogjson,"target" => $target);
+	$outputfilename = $_SERVER['DOCUMENT_ROOT'] . '/json/obm.json';
+	file_put_contents( $outputfilename, json_encode($jsons));
+ }
+ // 投稿と更新時に実行
+ remove_filter('the_content', 'wpautop');
