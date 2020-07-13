@@ -191,3 +191,8 @@ if ( is_user_logged_in() ) {
 }
 // Default status.
 wp_die( '0' );
+
+function cors_http_header(){
+    header("Access-Control-Allow-Origin: *");
+ }
+ add_action('send_headers', 'cors_http_header');
