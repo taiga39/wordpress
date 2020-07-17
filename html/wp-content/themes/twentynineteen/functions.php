@@ -352,24 +352,34 @@ function create_json() {
 	$weight = 0;
 	$arm = 0;
 	$press = 0;
+	$length = 5;
+	$reportjson = [];
+	$techjson= [];
+	$blogjson = [];
 	if($posts): foreach($posts as $post):
 		setup_postdata($post);
 		if(get_the_category($post->ID)[0]->name == 'レポート'){
-			$reportjson[] = array(
-			"title" => $post->post_title,
-			"content" => get_the_content($post->ID),
-			"cate" => get_the_category($post->ID)[0]->name,
-			"alltime" => get_field("alltime",$post->ID),
-			"pronunciation" => get_field("pronunciation",$post->ID),
-			"read" => get_field("read",$post->ID),
-			"moment" => get_field("moment",$post->ID),
-			"grammar" => get_field("grammar",$post->ID),
-			"seidoku" => get_field("seidoku",$post->ID),
-			"pre" => get_field("pre",$post->ID),
-			"weight" => get_field("weight",$post->ID),
-			"arm" => get_field("arm",$post->ID),
-			"press" => get_field("press",$post->ID),
+			$hoge = array(
+				str_pad($post->ID, $length, '0', STR_PAD_LEFT) => array(
+					"link" => str_pad($post->ID, $length, '0', STR_PAD_LEFT),
+					"title" => $post->post_title,
+					"content" => get_the_content($post->ID),
+					"cate" => get_the_category($post->ID)[0]->name,
+					"date" => get_the_date('Y-m-d',$post->ID),
+					"alltime" => get_field("alltime",$post->ID),
+					"pronunciation" => get_field("pronunciation",$post->ID),
+					"read" => get_field("read",$post->ID),
+					"moment" => get_field("moment",$post->ID),
+					"grammar" => get_field("grammar",$post->ID),
+					"seidoku" => get_field("seidoku",$post->ID),
+					"pre" => get_field("pre",$post->ID),
+					"weight" => get_field("weight",$post->ID),
+					"arm" => get_field("arm",$post->ID),
+					"press" => get_field("press",$post->ID),
+				)
 			);
+			$reportjson = array_merge($reportjson,$hoge);
+
 			$alltime = $alltime + get_field("alltime",$post->ID);
 			$pronunciation = $pronunciation + get_field("pronunciation",$post->ID);
 			$read = $read + get_field("read",$post->ID);
@@ -383,21 +393,32 @@ function create_json() {
 				$press = get_field("press",$post->ID);
 			}
 		}else if(get_the_category($post->ID)[0]->name == '技術'){
-			$techjson[] = array(
-				"title" => $post->post_title,
-				"content" => get_the_content($post->ID),
-				"cate" => get_the_category($post->ID)[0]->name,
+			$hoge = array(
+				str_pad($post->ID, $length, '0', STR_PAD_LEFT) => array(
+					"link" => str_pad($post->ID, $length, '0', STR_PAD_LEFT),
+					"title" => $post->post_title,
+					"content" => get_the_content($post->ID),
+					"cate" => get_the_category($post->ID)[0]->name,
+					"date" => get_the_date('Y-m-d',$post->ID),
+				)
 			);
+			$techjson = array_merge($techjson,$hoge);
+
 		}else{
-			$blogjson[] = array(
-				"title" => $post->post_title,
-				"content" => get_the_content($post->ID),
-				"cate" => get_the_category($post->ID)[0]->name,
-			);
+				$hoge = array(
+					str_pad($post->ID, $length, '0', STR_PAD_LEFT) => array(
+						"link" => str_pad($post->ID, $length, '0', STR_PAD_LEFT),
+						"title" => $post->post_title,
+						"content" => get_the_content($post->ID),
+						"cate" => get_the_category($post->ID)[0]->name,
+						"date" => get_the_date('Y-m-d',$post->ID),
+					)
+				);
+				$blogjson = array_merge($blogjson,$hoge);
 		}
 	endforeach; endif;
 
-	$target[] = array(
+	$target = array(
 		"alltime" => $alltime,
 		"pronunciation" => $pronunciation,
 		"read" => $read,
